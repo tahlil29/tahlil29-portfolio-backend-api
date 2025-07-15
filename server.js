@@ -48,9 +48,9 @@ app.post('/send-message', async (req, res) => {
         const scriptResponse = await fetch(scriptUrl, {
             method: 'POST', // Use POST for writing data
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded' // Apps Script often expects form data
+                'Content-Type': 'application/x-www-form-urlencoded' // <--- This line
             },
-            body: new URLSearchParams({ // Correctly format for form-urlencoded
+            body: new URLSearchParams({ // <--- This line and what's inside it
                 name: name,
                 email: email,
                 message: message
