@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000; // Render will set process.env.PORT to 10
 // Example: If your frontend URL is https://my-portfolio-frontend-5678.onrender.com, it should be:
 // origin: 'https://my-portfolio-frontend-5678.onrender.com'
 app.use(cors({
-    origin: 'https://tahlil29-my-portfolio-frontend.onrender.com' // <--- REPLACE THIS PLACEHOLDER!
+    origin: 'https://tahlil29-portfolio-frontend-only.onrender.com' // <--- REPLACE THIS PLACEHOLDER!
 }));
 // ----------------------------------------------------------------------------
 
