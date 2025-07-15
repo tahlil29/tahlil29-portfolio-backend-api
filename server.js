@@ -4,18 +4,15 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
-const fetch = require('node-fetch'); // Make sure node-fetch is installed and in package.json
 
-dotenv.config(); // Load environment variables from .env file
+dotenv.config(); // Load environment variables from .env file (for local development)
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Render will set process.env.PORT to 10000
+const PORT = process.env.PORT || 3000;
 
 // --- IMPORTANT: CONFIGURE CORS ORIGIN WITH YOUR ACTUAL RENDER FRONTEND URL ---
-// Example: If your frontend URL is https://my-portfolio-frontend-5678.onrender.com, it should be:
-// origin: 'https://my-portfolio-frontend-5678.onrender.com'
 app.use(cors({
-    origin: 'https://tahlil29-portfolio-frontend-only.onrender.com' // <--- REPLACE THIS PLACEHOLDER!
+    origin: 'https://tahlil29-portfolio-frontend-only.onrender.com'
 }));
 // ----------------------------------------------------------------------------
 
@@ -30,6 +27,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+// --- Main /send-message route (ONLY SENDS EMAIL) ---
 app.post('/send-message', async (req, res) => {
     const { name, email, message } = req.body;
 
@@ -38,37 +36,10 @@ app.post('/send-message', async (req, res) => {
     }
 
     try {
-        // Prepare data for Google Apps Script
-        const scriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL; // Your deployed Apps Script URL
-        if (!scriptUrl) {
-            console.error('GOOGLE_APPS_SCRIPT_URL is not set in environment variables.');
-            return res.status(500).json({ message: 'Server configuration error: Google Apps Script URL missing.' });
-        }
-
-const scriptResponse = await fetch(scriptUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json' // <--- CHANGED to 'application/json'
-            },
-            body: JSON.stringify({ // <--- CHANGED to JSON.stringify()
-                name: name,
-                email: email,
-                message: message
-            })
-        });
-
-        const scriptResult = await scriptResponse.json(); // Assuming Apps Script returns JSON
-        console.log('Google Apps Script Response:', scriptResult);
-
-        if (scriptResult.status !== 'success') {
-            console.error('Error from Google Apps Script:', scriptResult.message);
-            return res.status(500).json({ message: 'Failed to save message to Google Sheet: ' + scriptResult.message });
-        }
-
-        // Send email notification (optional, based on your previous discussion)
+        // --- Send email notification using Nodemailer ---
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: process.env.RECEIVING_EMAIL, // The email where you want to receive messages
+            to: process.env.RECEIVING_EMAIL,
             subject: `New Contact Form Message from ${name}`,
             html: `
                 <h3>New Message from Portfolio Website</h3>
@@ -79,17 +50,18 @@ const scriptResponse = await fetch(scriptUrl, {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully!');
+        console.log('Email sent successfully!'); // Log success to Render logs
 
-        res.status(200).json({ message: 'Message sent and saved successfully!' });
+        res.status(200).json({ message: 'Message sent successfully!' }); // Success response to frontend
 
     } catch (error) {
-        console.error('Error sending message:', error);
-        res.status(500).json({ message: 'Server error: Failed to send message.' });
+        // Log the exact error to Render logs if email sending fails
+        console.error('Error sending email:', error);
+        res.status(500).json({ message: 'Server error: Failed to send email.' });
     }
 });
 
-// Basic route for testing if the backend is running (optional, but useful)
+// Basic route for testing if the backend is running
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'Portfolio Backend API is running! Use /send-message for POST requests.' });
 });
