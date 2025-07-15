@@ -45,16 +45,16 @@ app.post('/send-message', async (req, res) => {
             return res.status(500).json({ message: 'Server configuration error: Google Apps Script URL missing.' });
         }
 
-        const scriptResponse = await fetch(scriptUrl, {
-            method: 'POST', // Use POST for writing data
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded' // <--- This line
-            },
-            body: new URLSearchParams({ // <--- This line and what's inside it
-                name: name,
-                email: email,
-                message: message
-            })
+const scriptResponse = await fetch(scriptUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' // <--- CHANGED to 'application/json'
+            },
+            body: JSON.stringify({ // <--- CHANGED to JSON.stringify()
+                name: name,
+                email: email,
+                message: message
+            })
         });
 
         const scriptResult = await scriptResponse.json(); // Assuming Apps Script returns JSON
